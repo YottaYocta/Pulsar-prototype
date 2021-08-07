@@ -1,9 +1,9 @@
 import * as PIXI from "pixi.js";
 import * as Tone from "tone";
-import PulsarEngine from "./engine.js";
 import Floor from "./floor.js";
+import { PulsarEngine, engineMode } from "./engine.js";
 import { Chunk, chunkHeight, chunkWidth } from "./chunk.js";
-import { StaticEntity, ActiveEntity } from "./entity.js";
+import { StaticEntity, ActiveEntity, Player } from "./entity.js";
 
 const spriteSize = 32;
 const timeUnit = 60;
@@ -17,10 +17,10 @@ export default class PulsarGame {
   constructor() {
 
     // core //
-    this.engine = new PulsarEngine();
+    this.engine = new PulsarEngine(engineMode.DEVELOPMENT);
     this.engine.initialize(() => {
       this.entities = [];
-      this.entities[0] = new ActiveEntity(Math.floor(chunkWidth / 2  - 2 + Math.random() * 4), Math.floor(chunkHeight / 2 + 0.5 - 2 + Math.random() * 4), 1, 30, undefined);
+      this.entities[0] = new Player(Math.floor(chunkWidth / 2  - 2 + Math.random() * 4), Math.floor(chunkHeight / 2 + 0.5 - 2 + Math.random() * 4), 1, 30, undefined);
 
       // map generation //
       this.floors = [];
@@ -136,22 +136,12 @@ export default class PulsarGame {
     this.dmin7 = ["d3", "f3", "a3", "c4"];
     this.gmaj7 = ["g2", "b2", "d3", "f3"];
     this.cmaj7 = ["c3", "e3", "g3", "b3"];
+    this.melody = [];
     let eighthDuration = Tone.Time("8n").toSeconds();
     let count = 0;
     this.loop = new Tone.Loop(time => {
       this.synth.triggerAttackRelease(this.dmin7[0], "8n", 0 * eighthDuration + time);
-      this.synth.triggerAttackRelease(this.dmin7[1], "8n", 1 * eighthDuration + time);
-      this.synth.triggerAttackRelease(this.dmin7[2], "8n", 2 * eighthDuration + time);
-      this.synth.triggerAttackRelease(this.dmin7[3], "8n", 3 * eighthDuration + time);
-      this.synth.triggerAttackRelease(this.gmaj7[0], "8n", 4 * eighthDuration + time);
-      this.synth.triggerAttackRelease(this.gmaj7[1], "8n", 5 * eighthDuration + time);
-      this.synth.triggerAttackRelease(this.gmaj7[2], "8n", 6 * eighthDuration + time);
-      this.synth.triggerAttackRelease(this.gmaj7[3], "8n", 7 * eighthDuration + time);
-      this.synth.triggerAttackRelease(this.cmaj7[0], "8n", 8 * eighthDuration + time);
-      this.synth.triggerAttackRelease(this.cmaj7[1], "8n", 9 * eighthDuration + time);
-      this.synth.triggerAttackRelease(this.cmaj7[2], "8n", 10 * eighthDuration + time);
-      this.synth.triggerAttackRelease(this.cmaj7[3], "8n", 11 * eighthDuration + time);
-
+      this.synth.triggerAttackRelease(this.dmin7[0], "8n", 4 * eighthDuration + time);
     }, "1m").start(0);
     Tone.Transport.start()
   }

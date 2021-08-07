@@ -2,7 +2,19 @@ import * as PIXI from "pixi.js";
 import * as Tone from "tone";
 import Typewriter from "./typewriter.js";
 
-export default class PulsarEngine {
+export const engineMode = {
+  DEVELOPMENT: 0,
+  PRODUCTION: 1,
+};
+
+export class PulsarEngine {
+
+  constructor(mode) {
+    if (mode == undefined || mode == null)
+      this.mode = engineMode.PRODUCTION;
+    else
+      this.mode = mode;
+  }
 
   initialize(callback) {
 
@@ -21,7 +33,8 @@ export default class PulsarEngine {
     };
 
     window.addEventListener("keydown", initHandler);
-    window.onbeforeunload = () => { return "Are you sure you want to leave site? Game progress will be lost" };
+    if (this.mode == engineMode.PRODUCTION)
+      window.onbeforeunload = () => { return "Are you sure you want to leave site? Game progress will be lost" };
   }
 
   async initAudio() {

@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import { Melody } from "./music.js";
 
 export class StaticEntity {
   constructor(x, y, sprite) {
@@ -17,3 +18,14 @@ export class ActiveEntity extends StaticEntity {
     this.health = health;
   }
 }
+
+export class Player extends ActiveEntity {
+  constructor(x, y, speed, health, sprite) {
+    super(x, y, speed, health, sprite);
+    this.melody = new Melody(4);
+    this.melody.genMelodyInKey("C");
+    console.log(this.melody.getData());
+    console.log(this.melody.getData());
+  }
+}
+
