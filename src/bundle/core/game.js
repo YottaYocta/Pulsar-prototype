@@ -4,7 +4,10 @@ import Floor from "./floor.js";
 import { parseSixteenthTime } from "./music.js"; 
 import { PulsarEngine, engineMode } from "./engine.js";
 import { Chunk, chunkHeight, chunkWidth } from "./chunk.js";
-import { StaticEntity, ActiveEntity, Player } from "./entity.js";
+import { StaticEntity, ActiveEntity, AudioEntity } from "./entity.js";
+/**
+import { Vec2 } form "./physics.js";
+**/
 
 const spriteSize = 32;
 const timeUnit = 60;
@@ -21,8 +24,9 @@ export default class PulsarGame {
     this.engine = new PulsarEngine(engineMode.DEVELOPMENT);
     this.engine.initialize(() => {
       this.entities = [];
-      this.entities[0] = new Player(Math.floor(chunkWidth / 2  - 2 + Math.random() * 4), Math.floor(chunkHeight / 2 + 0.5 - 2 + Math.random() * 4), 1, 30, undefined);
+      this.entities[0] = new AudioEntity(Math.floor(chunkWidth / 2  - 2 + Math.random() * 4), Math.floor(chunkHeight / 2 + 0.5 - 2 + Math.random() * 4), 1, 30, undefined);
       this.entities[0].melody.genMelodyInKey("C");
+      this.initPulse();
 
       // map generation //
       this.floors = [];
@@ -41,7 +45,6 @@ export default class PulsarGame {
       });
       loader.onComplete.add(() => {
         this.initGameLoop();
-        this.refreshPulse();
       });
     });
   }
@@ -141,25 +144,22 @@ export default class PulsarGame {
     this.repaint();
   }
 
-  refreshPulse() {
+  initPulse() {
     this.tempo = Math.floor(Math.random() * 20) + 230;
     this.pulseSynth = new Tone.MembraneSynth().toDestination();
-    this.synth = new Tone.FMSynth().toDestination();
-    let QNoteSeconds = new Tone.Time("4n").toSeconds();
     this.melodyLoop = new Tone.Loop(time => {
       let data = this.entities[0].melody.getData();
       for (let i = 0; i < data.length; i++) {
-        this.synth.triggerAttackRelease(data[i].note, parseSixteenthTime(data[i].duration), Tone.Time(parseSixteenthTime(data[i].start)).toSeconds() + time);
+        this.entities[0].synth.triggerAttackRelease(data[i].note, parseSixteenthTime(data[i].duration), Tone.Time(parseSixteenthTime(data[i].start)).toSeconds() + time);
       }
     }, parseSixteenthTime(this.entities[0].melody.getDuration())).start(2);
     this.pulseLoop = new Tone.Loop(time => {
-        this.pulseSynth.triggerAttackRelease("C2", "8n", time);
-        this.entities.forEach(entity => {
-          entity.sprite.scale.set(1);
-          entity.sprite.scale.x += 0.08;
-          entity.sprite.scale.y = entity.sprite.scale.x;
-        });
-
+      this.pulseSynth.triggerAttackRelease("C2", "8n", time);
+      this.entities.forEach(entity => {
+        entity.sprite.scale.set(1);
+        entity.sprite.scale.x += 0.08;
+        entity.sprite.scale.y = entity.sprite.scale.x;
+      });
     }, "2n").start(2);
     Tone.Transport.start();
     Tone.Transport.bpm.set({
