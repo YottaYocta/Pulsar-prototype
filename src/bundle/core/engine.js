@@ -4,7 +4,7 @@ import Typewriter from "./typewriter.js";
 
 export const engineMode = {
   DEVELOPMENT: 0,
-  PRODUCTION: 1,
+  PRODUCTION: 1
 };
 
 export class PulsarEngine {

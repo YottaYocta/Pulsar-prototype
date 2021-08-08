@@ -10,13 +10,13 @@ module.exports = {
       metaDesc: "RLTTB",
       template: "./src/templates/index.html",
       filename: "index.html",
-      inject: "body",
+      inject: "body"
     }),
     new CopyPlugin({
       patterns: [
         { from: "src/assets", to: "assets" }
-      ],
-    }),
+      ]
+    })
   ],
   module: {
     rules: [
@@ -27,19 +27,19 @@ module.exports = {
           loader: "babel-loader",
           options: {
             presets: ["@babel/preset-env"],
-            plugins: ["@babel/transform-runtime"],
+            plugins: ["@babel/transform-runtime"]
           }
-        },
-      },
-    ],
+        }
+      }
+    ]
   },
   entry: "./src/bundle/index.js",
   mode: "development",
   output: {
-    clean: true,
+    clean: true
   },
   devServer: {
     contentBase: "./dist",
-    open: true,
-  },
+    open: true
+  }
 };

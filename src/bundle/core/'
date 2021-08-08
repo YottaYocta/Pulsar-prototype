@@ -30,47 +30,17 @@ export const chordProgressions = {
       type: chordTypes.MINOR
     },
   ],
-  andalusian: [
-    {
-      degree: 0,
-      type: chordTypes.MINOR
-    },
-    {
-      degree: 10,
-      type: chordTypes.MAJOR
-    },
-    {
-      degree: 8,
-      type: chordTypes.MAJOR
-    },
-    {
-      degree: 7,
-      type: chordTypes.DOMINANT
-    }
-  ],
-  min1165: [
-    {
-      degree: 0,
-      type: chordTypes.MINOR
-    },
-    {
-      degree: 0,
-      type: chordTypes.MINOR
-    },
-    {
-      degree: 8,
-      type: chordTypes.MINOR
-    },
-    {
-      degree: 7,
-      type: chordTypes.DOMINANT
-    }
-  ]
 };
+
+export function genRandomChordProgression() {
+  let progressions = Object.values(chordProgressions);
+  return progressions[Math.floor(Math.random() * progressions.length)];
+}
 
 export class Melody {
   constructor(numMeasures) {
     this.measures = [];
+    this.octaveCenter = 5;
     for (let i = 0; i < numMeasures; i++) {
       this.measures.push(new Measure());
     }
@@ -80,12 +50,13 @@ export class Melody {
     let index = noteMappings.indexOf(key);
     let chordProgression = genRandomChordProgression();
     let count = 0;
-    let octaveCenter = 4;
-    let octave = octaveCenter;
+    this.octaveCenter = Math.floor(Math.random() * 2) + 4;
+    let octave = this.octaveCenter;
     for (let i = 0; i < this.measures.length; i++) {
       count = Math.floor(i / this.measures.length * chordProgression.length);
       let degree = (chordProgression[count].degree + index) % 12;
-      octave = this.measures[i].genMeasure(degree, chordProgression[count], octave, octaveCenter);
+      console.log("degree", degree);
+      octave = this.measures[i].genMeasure(degree, chordProgression[count], octave);
     }
   }
 
@@ -130,52 +101,12 @@ export class Measure {
     return data;
   }
 
-  genMeasure(scaleDegree, chord, octave, octaveCenter) {
+  genMeasure(scaleDegree, chord, octave) {
     let tonic = scaleDegree;
     let nOctave = octave;
     let values = genChordValues(chord);
+    let degree = 0;
     let duration = 3;
-    let degree = Math.floor(Math.random() * values.length);
-    let next = (Math.random() > 0.5) ? 1 : -1;
-    let weights = {
-      repeat: 1,
-      rest: 0
-    }
-    for (let i = 0; i < 4; i++) {
-      switch (i) {
-        case 1: weights.rest = Math.random(); weights.repeat = Math.random(); break;
-        case 3: weights.rest = Math.random() / 2; weights.repeat = Math.random(); break;
-        default: weights.rest = 0; weights.repeat = 0; break;
-      }
-      let value;
-      if (weights.rest > 0.9) {
-        value = null;
-      }
-      else {
-        if (weights.repeat < 0.8)
-          degree += next;
-        if (degree >= values.length) {
-          degree %= values.length;
-          nOctave++;
-          let threshold = (Math.random() + 0.05) * (nOctave - octaveCenter); 
-          console.log('higher', threshold);
-          next = (threshold > 0.05) ? -1 : 1;
-        }
-        else if (degree < 0) {
-          degree = values.length + degree;
-          nOctave--;
-          let threshold = (Math.random() + 0.05) * (octaveCenter - nOctave); 
-          console.log('lower', threshold);
-          next = (threshold > 0.05) ? 1 : -1;
-        }
-        value = values[degree];
-      }
-      weights.rest = 0;
-      let note = new Note(nOctave, value, tonic, duration, i * 4);
-      this.notes.push(note);
-    }
-    return nOctave;
-    /**
     let weights = {
       up: 1,
       down: 1,
@@ -183,7 +114,16 @@ export class Measure {
       rest: 0
     }
     let totalWeightSum = weights.up + weights.down + weights.repeat;
+    console.log("break");
     for (let i = 0; i < 4; i++) {
+      degree++;
+      degree %= values.length;
+      let value = values[degree];
+      let note = new Note(nOctave, value, tonic, duration, i * 4);
+      console.log(nOctave, value, tonic);
+      console.log(note.getAbsolute());
+      this.notes.push(note);
+      /**
       totalWeightSum = weights.up + weights.down + weights.repeat;
       let randomWeightSum = Math.random() * totalWeightSum;
       if (i == 1) {
@@ -195,9 +135,9 @@ export class Measure {
         weights.rest = Math.random();
       }
       let value = (weights.rest > 0.3) ? null : values[degree];
-      let note = new Note(nOctave, value, tonic, duration, i * 4);
-      this.notes.push(note);
+      console.log(value);
       weights.rest = 0;
+      this.notes.push(note);
       if (randomWeightSum > weights.repeat + weights.down) {
         degree++; 
         weights.up /= 5; 
@@ -219,8 +159,9 @@ export class Measure {
       else {
         weights.repeat /= 2;
       }
+      **/
     }
-    **/
+    return nOctave;
   }
 }
 
@@ -234,7 +175,8 @@ export class Note {
   }
 
   getAbsolute() {
-    let noteValue = (this.degree == null) ? null : (this.degree + 12 * this.octave) + this.tonic;
+    let noteValue = (this.degree == null) ? null : (this.degree + 12 * this.octave) - this.tonic;
+    console.log(noteValue + "abs");
     let absolute = {
       octave: Math.floor(noteValue / 12),
       degree: noteValue % 12,
@@ -267,9 +209,3 @@ export function genChordValues(chord) {
   }
   return values;
 }
-
-export function genRandomChordProgression() {
-  let progressions = Object.values(chordProgressions);
-  return progressions[Math.floor(Math.random() * progressions.length)];
-}
-

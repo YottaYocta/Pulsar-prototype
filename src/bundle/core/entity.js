@@ -22,10 +22,7 @@ export class ActiveEntity extends StaticEntity {
 export class Player extends ActiveEntity {
   constructor(x, y, speed, health, sprite) {
     super(x, y, speed, health, sprite);
-    this.melody = new Melody(4);
-    this.melody.genMelodyInKey("C");
-    console.log(this.melody.getData());
-    console.log(this.melody.getData());
+    this.melody = new Melody(8);
   }
 }
 

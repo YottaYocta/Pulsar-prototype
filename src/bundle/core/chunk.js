@@ -4,7 +4,7 @@ export const chunkHeight = 16;
 export const chunkWidth = 32;
 export const roomType = {
   SPAWN: 0,
-  GENERIC: 1,
+  GENERIC: 1
 };
 
 export class Chunk {

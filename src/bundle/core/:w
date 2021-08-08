@@ -126,7 +126,7 @@ export default class PulsarGame {
           entity.y -= changeY;
       }
       if (entity.sprite.scale.x > 1)
-        entity.sprite.scale.x /= 1.005;
+        entity.sprite.scale.x /= 1.05;
         entity.sprite.scale.y = entity.sprite.scale.x;
     });
   }
@@ -155,7 +155,6 @@ export default class PulsarGame {
     this.pulseLoop = new Tone.Loop(time => {
         this.pulseSynth.triggerAttackRelease("C2", "8n", time);
         this.entities.forEach(entity => {
-          entity.sprite.scale.set(1);
           entity.sprite.scale.x += 0.08;
           entity.sprite.scale.y = entity.sprite.scale.x;
         });
