@@ -30,6 +30,24 @@ export const chordProgressions = {
       type: chordTypes.MINOR
     },
   ],
+  min1165: [
+    {
+      degree: 0,
+      type: chordTypes.MINOR7
+    },
+    {
+      degree: 0,
+      type: chordTypes.MINOR7
+    },
+    {
+      degree: 8,
+      type: chordTypes.DOMINANT
+    },
+    {
+      degree: 7,
+      type: chordTypes.DOMINANT
+    }
+  ],
   andalusian: [
     {
       degree: 0,
@@ -267,7 +285,9 @@ export function genChordValues(chord) {
 }
 
 export function genRandomChordProgression() {
-  let progressions = Object.values(chordProgressions);
-  return progressions[Math.floor(Math.random() * progressions.length)];
+  let progressions = Object.entries(chordProgressions);
+  let [ name, progression ] = progressions[Math.floor(Math.random() * progressions.length)];
+  console.log(`progression generated: ${name}`);
+  return progression;
 }
 
