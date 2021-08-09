@@ -1,7 +1,4 @@
 
-const randOctLowLimit = 4;
-const randOctHighLimit = 5;
-
 export const noteMappings = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
 
 export const chordTypes = {
@@ -161,15 +158,13 @@ export class Measure {
           degree %= values.length;
           nOctave++;
           let threshold = (Math.random() + 0.05) * (nOctave - octaveCenter); 
-          console.log('higher', threshold);
-          next = (threshold > 0.05 || nOctave > randOctHighLimit) ? -1 : 1;
+          next = (threshold > 0.05) ? -1 : 1;
         }
         else if (degree < 0) {
           degree = values.length + degree;
           nOctave--;
           let threshold = (Math.random() + 0.05) * (octaveCenter - nOctave); 
-          console.log('lower', threshold);
-          next = (threshold > 0.05 || nOctave < randOctLowLimit) ? 1 : -1;
+          next = (threshold > 0.05) ? 1 : -1;
         }
         value = values[degree];
       }

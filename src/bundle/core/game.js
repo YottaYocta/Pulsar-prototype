@@ -4,12 +4,11 @@ import Floor from "./floor.js";
 import { parseSixteenthTime } from "./music.js"; 
 import { PulsarEngine, engineMode } from "./engine.js";
 import { Chunk, chunkHeight, chunkWidth } from "./chunk.js";
-import { StaticEntity, ActiveEntity, AudioEntity } from "./entity.js";
+import { StaticEntity, ActiveEntity, AudioEntity, spriteSize } from "./entity.js";
 /**
 import { Vec2 } form "./physics.js";
 **/
 
-const spriteSize = 32;
 const timeUnit = 60;
 const loader = PIXI.Loader.shared;
 const wallCollision = {
@@ -40,7 +39,8 @@ export default class PulsarGame {
       // assets //
       this.playerAssets = ["assets/red.png", "assets/blue.png", "assets/green.png"];
       this.environmentAssets = ["assets/rock-wall.png", "assets/rock-wall-top.png"];
-      loader.add(this.environmentAssets).add(this.playerAssets).load(() => {
+      this.pulseAssets = ["assets/pulse-basic.png"];
+      loader.add(this.environmentAssets).add(this.playerAssets).add(this.pulseAssets).load(() => {
         this.createSprites();
       });
       loader.onComplete.add(() => {
@@ -59,13 +59,14 @@ export default class PulsarGame {
         entity.sprite = new PIXI.Sprite(loader.resources[this.environmentAssets[0]].texture);
       else
         entity.sprite = new PIXI.Sprite(loader.resources[this.environmentAssets[1]].texture);
-      entity.sprite.anchor.set(0.5, 0.5);
-      entity.sprite.position.set(entity.x * spriteSize + 0.5 * spriteSize, entity.y * spriteSize + 0.5 * spriteSize);
+      entity.sprite.anchor.set(0.5);
+      entity.sprite.position.set((entity.x + 0.5) * spriteSize, (entity.y + 0.5) * spriteSize);
       this.engine.app.stage.addChild(entity.sprite);
     });
+
     this.entities.forEach(entity => {
-      entity.sprite.anchor.set(0.5, 0.5);
-      entity.sprite.position.set((entity.x + 0.5) * spriteSize, (entity.y + 0.5) * spriteSize);
+      entity.genPulseSprites(loader.resources[this.pulseAssets[Math.floor(Math.random() * this.pulseAssets.length)]].texture);
+      this.engine.app.stage.addChild(...entity.pulseSprites);
     });
   }
 
@@ -110,6 +111,7 @@ export default class PulsarGame {
 
   repaint() {
     this.entities.forEach(entity => {
+      entity.sprite.anchor.set(0.5);
       entity.sprite.position.set((entity.x + 0.5) * spriteSize, (entity.y + 0.5) * spriteSize);
     });
   }
@@ -131,6 +133,10 @@ export default class PulsarGame {
       if (entity.sprite.scale.x > 1)
         entity.sprite.scale.x /= 1.005;
         entity.sprite.scale.y = entity.sprite.scale.x;
+      entity.pulseSprites.forEach(sprite => {
+        if (sprite.alpha > 0)
+          sprite.alpha = Math.max(sprite.alpha - 0.04, 0);
+      });
     });
   }
 
@@ -159,6 +165,7 @@ export default class PulsarGame {
         entity.sprite.scale.set(1);
         entity.sprite.scale.x += 0.08;
         entity.sprite.scale.y = entity.sprite.scale.x;
+        entity.handlePulse();
       });
     }, "2n").start(2);
     Tone.Transport.start();
