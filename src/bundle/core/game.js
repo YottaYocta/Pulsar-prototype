@@ -26,6 +26,10 @@ export default class PulsarGame {
       this.entities[0] = new AudioEntity(Math.floor(chunkWidth / 2  - 2 + Math.random() * 4), Math.floor(chunkHeight / 2 + 0.5 - 2 + Math.random() * 4), 1, 30, undefined);
       this.entities[0].melody.genMelodyInKey("C");
       this.initPulse();
+      
+      // misc //
+      this.pulses = [];
+      this.pulseSprites = [];
 
       // map generation //
       this.floors = [];
@@ -62,11 +66,6 @@ export default class PulsarGame {
       entity.sprite.anchor.set(0.5);
       entity.sprite.position.set((entity.x + 0.5) * spriteSize, (entity.y + 0.5) * spriteSize);
       this.engine.app.stage.addChild(entity.sprite);
-    });
-
-    this.entities.forEach(entity => {
-      entity.genPulseSprites(loader.resources[this.pulseAssets[Math.floor(Math.random() * this.pulseAssets.length)]].texture);
-      this.engine.app.stage.addChild(...entity.pulseSprites);
     });
   }
 
@@ -133,10 +132,10 @@ export default class PulsarGame {
       if (entity.sprite.scale.x > 1)
         entity.sprite.scale.x /= 1.005;
         entity.sprite.scale.y = entity.sprite.scale.x;
-      entity.pulseSprites.forEach(sprite => {
-        if (sprite.alpha > 0)
-          sprite.alpha = Math.max(sprite.alpha - 0.04, 0);
-      });
+    });
+    this.pulseSprites.forEach(sprite => {
+      if (sprite.alpha > 0)
+        sprite.alpha -= 0.05;
     });
   }
 
@@ -161,17 +160,41 @@ export default class PulsarGame {
     }, parseSixteenthTime(this.entities[0].melody.getDuration())).start(2);
     this.pulseLoop = new Tone.Loop(time => {
       this.pulseSynth.triggerAttackRelease("C2", "8n", time);
+      this.pulses = [];
+      let spritesUsed = 0;
       this.entities.forEach(entity => {
         entity.sprite.scale.set(1);
         entity.sprite.scale.x += 0.08;
         entity.sprite.scale.y = entity.sprite.scale.x;
-        entity.handlePulse();
+        let pulses = entity.handlePulse();
+        for (let i = 0; i < pulses.length; i++) {
+          let affected = pulses[i].getAffectedTiles();
+          for (let j = 0; j < affected.length; j++) {
+            let sprite;
+            if (this.pulseSprites.length <= spritesUsed) {
+              sprite = this.createPulseSprite();
+              sprite.anchor.set(0.5);
+              this.pulseSprites.push(sprite);
+              this.engine.app.stage.addChild(sprite);
+            }
+            else {
+              sprite = this.pulseSprites[spritesUsed];
+            }
+            sprite.position.set((affected[j].x + 0.5) * spriteSize, (affected[j].y + 0.5) * spriteSize);
+            sprite.alpha = 1;
+            spritesUsed++;
+          }
+        }
       });
     }, "2n").start(2);
     Tone.Transport.start();
     Tone.Transport.bpm.set({
       value: this.tempo
     });
+  }
+
+  createPulseSprite() {
+    return new PIXI.Sprite(loader.resources[this.pulseAssets[0]].texture);
   }
 
   // Collision and Physics //
